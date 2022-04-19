@@ -123,11 +123,11 @@
                 <form class="col s12">
                     <div class="row">
                         <div class="input-field col s6">
-                            <input id="user" type="text" class="validate">
+                            <input v-model="username" id="login" type="text" class="validate">
                             <label for="login">Usuário</label>
                         </div>
                         <div class="input-field col s6">
-                            <input id="password" type="password" class="validate">
+                            <input v-model="password" id="password" type="password" class="validate">
                             <label for="password">Senha</label>
                         </div>
                         <div class="center col s12">

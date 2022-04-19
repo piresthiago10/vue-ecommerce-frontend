@@ -1,6 +1,8 @@
 const app = new Vue({
     el: '#app',
     data: {
+        username: '',
+        password: '',
         is_logged: false,
         apiUrl: 'http://0.0.0.0:8000/api/',
         apiToken: '',
@@ -51,8 +53,8 @@ const app = new Vue({
             this.apiToken = ''
             this.is_logged = false
             await axios.post(this.apiUrl + 'login/', {
-                username: 'piresthiago10',
-                password: 'teste123456'
+                username: this.username,
+                password: this.password
             })
                 .then(response => (
                     this.apiToken = response.data.token,
