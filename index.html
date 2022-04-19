@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <nav>
+            <div class="nav-wrapper blue-grey">
+                <img src="/images/shopping-cart.png" style="margin-top: 10px; margin-left: 10px;" width="38" height="38"
+                    alt=""><a href="#" class="brand-logo grey-text text-darken-4">MercadoTop</a>
+                    <a v-if="is_logged" href="#!" class="brand-logo center green-text text-lighten-1">Caixa Aberto</a>
+                    <a v-else href="#!" class="brand-logo center red-text text-lighten-1">Caixa Fechado</a>
+            </div>
+        </nav>
+        <div v-if="is_logged" class="row">
+            <nav v-if="error">
+                <div class="row center red lighten-2">
+                    {{ errorMessage }}
+                </div>
+            </nav>
+
+            <nav v-if="success">
+                <div class="row center green lighten-1">
+                    {{ successMessage }}
+                </div>
+            </nav>
+
+            <div v-if="loading" class="progress">
+                <div class="indeterminate"></div>
+            </div>
+            <div class="row" style="margin-top: 50px;">
+                <form class="col s12 center">
+                    <div class="row">
+                        <div class="row col s8">
+                            <div class="input-field col s7">
+                                <input @keyup="getProducts" v-model="productSearch" id="productSearch" 
+                                autocomplete="off" type="text" class="validate" required>
+                                <label for="productSearch">Buscar pelo código de barras ou descrição</label>
+                            </div>
+
+                            <div v-if="options" style="width: 50%; position: absolute; margin-top: 60px;">
+                                <select multiple class="browser-default" id="productSelect" @click="onChange($event)"
+                                    v-model="choosenProduct">
+                                    <option v-for="option in options" v-bind:value="option.value">
+                                        {{ option.text }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="input-field col s3">
+                                <input v-model="quantity" id="icon_telephone" type="number" min="0" class="validate" required>
+                                <label for="icon_telephone">Quantidade de items</label>
+                            </div>
+                            <div class="input-field col s1">
+                                <a class="waves-effect blue darken-4 btn-large" @click="addProductToShoppingCart()">Adicionar</a>
+                            </div>
+
+                            <table class="striped">
+                                <thead>
+                                    <tr>
+                                        <th>Produto/Serviço</th>
+                                        <th>Quantidade</th>
+                                        <th>Preço Unitário</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr v-for="item in shopCart">
+                                        <td>{{item.description}}</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>{{item.price | currency }}</td>
+                                        <td>{{item.total | currency }}</td>
+                                        <td><a class="btn-floating btn-small waves-effect waves-light red"><i
+                                                    class="material-icons" @click="removeProductToShoppingCart(item.id)">delete</i></a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col s4">
+                            <h4 class="header col s12 left">Dados da Venda</h4>
+                            <label class="left" style="margin-top: 15px;">Escolha um vendedor</label>
+                            <select v-model="choosenSeller" class="browser-default" required>
+                                <option value="" disabled selected>vendedores...</option>
+                                <option v-for="seller in sellers" :value="seller.id">{{seller.name}}</option>
+                            </select>
+                            <label class="left" style="margin-top: 15px;">Escolha um cliente</label>
+                            <select v-model="choosenCustomer" class="browser-default" required>
+                                <option value="" disabled selected>clientes...</option>
+                                <option v-for="customer in customers" :value="customer.id">{{customer.name}}</option>
+                            </select>
+                            <div class="row" style="margin-top: 300px;">
+                                <div class="col s6" style="margin-top: 12px;">
+                                    <h6>Valor total da venda<h6>
+                                </div>
+                                <div class="col s6">
+                                    <h5>{{shopValue | currency}}</h5>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col s6">
+                                    <a class="waves-effect blue darken-4 btn" @click="cancelShop()">Cancelar</a>
+                                </div>
+                                <div class="col s6">
+                                    <a class="waves-effect waves-light btn" @click="shopItems()">Finalizar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div v-else class="row">
+            <div class="container center" style="margin-top: 50px;">
+                <form class="col s12">
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input id="user" type="text" class="validate">
+                            <label for="login">Usuário</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="password" type="password" class="validate">
+                            <label for="password">Senha</label>
+                        </div>
+                        <div class="center col s12">
+                            <a class="waves-effect waves-light btn" @click="login()">Acessar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
